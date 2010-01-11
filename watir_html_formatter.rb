@@ -2,6 +2,7 @@ require 'spec/runner/formatter/html_formatter'
 require 'win32screenshot'
 require 'rmagick'
 require 'pathname'
+require 'fileutils'
 
 class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
 
@@ -9,6 +10,7 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
     raise "output has to be a file path!" unless output.is_a?(String)
     @output_dir = File.dirname(output)
     @files_dir = File.join(@output_dir, "files")
+    FileUtils.mkdir_p(@files_dir) unless File.exists?(@files_dir)
     super
   end
 
@@ -16,18 +18,19 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
     content = []
     content << "<span>"
     file_name = save_html
-    content << link_for(file_name) if file_name && File.exists?(file_name)
+    content << link_for(file_name)
     
     file_name = save_screenshot
-    content << link_for(file_name) if file_name && File.exists?(file_name)
+    content << link_for(file_name)
 
     content << "</span>"
     super + content.join($/)
   end
 
   def link_for(file_name)
-    description = File.extname(file_name).upcase[1..-1]
+    return unless file_name && File.exists?(file_name)
 
+    description = File.extname(file_name).upcase[1..-1]
     path = Pathname.new(file_name)
     "<a href='#{path.relative_path_from(Pathname.new(@output_dir))}'>#{description}</a>&nbsp;"
   end
