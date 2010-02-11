@@ -10,7 +10,10 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
     raise "output has to be a file path!" unless output.is_a?(String)
     @output_dir = File.dirname(output)
     @files_dir = File.join(@output_dir, "files")
-    FileUtils.mkdir_p(@files_dir) unless File.exists?(@files_dir)
+    if File.exists?(@output_dir)
+      FileUtils.mv @output_dir, "#{@output_dir}_#{File.mtime(@output_dir).strftime("%m%d%y_%H%M%S")}"
+    end
+    FileUtils.mkdir_p(@files_dir)
     $formatter = self
     super
   end
