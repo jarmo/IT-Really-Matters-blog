@@ -21,6 +21,7 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
   end
 
   def extra_failure_content(failure)
+    save_javascript_error
     save_html
     save_screenshot
 
@@ -62,6 +63,20 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
     rescue => e
       $stderr.puts "saving of screenshot failed: #{e.message}"
       $stderr.puts e.backtrace
+    end
+    file_name
+  end
+
+  def save_javascript_error
+    file_name = nil
+    if $browser.is_a?(Watir::IE) && $browser.status =~ /Error on page/
+      autoit = Watir::autoit
+      autoit.AutoItSetOption("MouseCoordMode", 0)
+      autoit.ControlClick("[TITLE:#{$browser.title}]", "", "[CLASS:msctls_statusbar32]", "left", 2)
+      popup_title = "[REGEXPTITLE:^(Windows )?Internet Explorer$]"
+      autoit.WinWait(popup_title, "", 10)
+      file_name = save_screenshot("JS_Error")
+      autoit.WinClose(popup_title)
     end
     file_name
   end
