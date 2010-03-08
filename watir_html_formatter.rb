@@ -14,12 +14,16 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
       FileUtils.mv @output_dir, "#{@output_dir}_#{File.mtime(@output_dir).strftime("%m%d%y_%H%M%S")}"
     end
     FileUtils.mkdir_p(@files_dir)
-    $formatter = self
     super
   end
 
   def example_started(example)
     @files_saved_during_example = []
+    super
+  end
+
+  def example_failed(example, counter, failure)
+    @browser = example.options[:browser]
     super
   end
 
@@ -45,7 +49,7 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
 
   def save_html
     begin
-      html = $browser.html
+      html = @browser.html
       file_name = file_path("browser.html")
       File.open(file_name, 'w') {|f| f.puts html}
     rescue => e
@@ -57,8 +61,8 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
 
   def save_screenshot(description="Screenshot")
     begin
-      $browser.bring_to_front
-      width, height, blob = Win32::Screenshot.capture_hwnd($browser.hwnd)
+      @browser.bring_to_front
+      width, height, blob = Win32::Screenshot.capture_hwnd(@browser.hwnd)
       file_name = file_path("screenshot.png", description)
       img = Magick::ImageList.new
       img.from_blob(blob)
@@ -72,10 +76,10 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
 
   def save_javascript_error
     file_name = nil
-    if $browser.is_a?(Watir::IE) && $browser.status =~ /Error on page/
+    if @browser.is_a?(Watir::IE) && @browser.status =~ /Error on page/
       autoit = Watir::autoit
       autoit.AutoItSetOption("MouseCoordMode", 0)
-      autoit.ControlClick("[TITLE:#{$browser.title}]", "", "[CLASS:msctls_statusbar32]", "left", 2)
+      autoit.ControlClick("[TITLE:#{@browser.title}]", "", "[CLASS:msctls_statusbar32]", "left", 2)
       popup_title = "[REGEXPTITLE:^(Windows )?Internet Explorer$]"
       autoit.WinWait(popup_title, "", 10)
       file_name = save_screenshot("JS_Error")
@@ -83,7 +87,7 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
     end
     file_name
   end
-  
+
   def file_path(file_name, description=nil)
     extension = File.extname(file_name)
     basename = File.basename(file_name, extension)
