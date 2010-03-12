@@ -1,17 +1,14 @@
-require 'watir'
-require 'spec'
+require "application_helper"
 
 describe "Google" do
+  include ApplicationHelper
 
   before :all do
-    @browser = Watir::Browser.new
-    set_browser_for_rspec
-    @browser.maximize
-    @browser.goto "http://google.com"
+    open_browser_at "http://google.com"
   end
 
   before :each do
-    options[:browser] = @browser
+    set_browser_for_rspec
   end
 
   it "has word 'Google' on main page" do
@@ -43,16 +40,7 @@ describe "Google" do
   end
 
   after :all do
-    set_browser_for_rspec
-    @browser.close
-  end
-
-  def set_browser_for_rspec
-    options[:browser] = @browser
-  end
-
-  def formatter
-    @formatter ||= Spec::Runner.options.formatters.find {|f| f.kind_of?(WatirHtmlFormatter)}
+    close_browser
   end
 
 end
