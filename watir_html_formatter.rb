@@ -6,6 +6,8 @@ require 'fileutils'
 
 class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
 
+  attr_writer :browser
+
   def initialize(options, output)
     raise "output has to be a file path!" unless output.is_a?(String)
     @output_dir = File.dirname(output)
@@ -19,11 +21,6 @@ class WatirHtmlFormatter < Spec::Runner::Formatter::HtmlFormatter
 
   def example_started(example)
     @files_saved_during_example = []
-    super
-  end
-
-  def example_failed(example, counter, failure)
-    @browser = example.options[:browser]
     super
   end
 
