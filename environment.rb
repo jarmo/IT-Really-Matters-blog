@@ -9,3 +9,5 @@ filtered_ruby_files = Dir.glob(spec_dir).delete_if do |file|
   File.basename(file) =~ /.*_spec\.rb$/
 end
 require_all filtered_ruby_files unless filtered_ruby_files.empty?
+
+require_rel "spec_helper.rb"

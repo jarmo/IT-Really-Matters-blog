@@ -1,6 +1,3 @@
-require "spec"
-require "watir"
-
 module SpecHelper
 
   def open_browser_at url
@@ -32,4 +29,10 @@ module SpecHelper
   def native_file_path(path)
     File::ALT_SEPARATOR ? path.gsub(File::SEPARATOR, File::ALT_SEPARATOR) : path
   end
+end
+
+Spec::Runner.configure do |config|
+  config.include(SpecHelper)
+  config.before(:all) {@browser = Watir::Browser.new}
+  config.after(:all) {@browser.close}
 end
