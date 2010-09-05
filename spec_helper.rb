@@ -29,6 +29,14 @@ module SpecHelper
   def native_file_path(path)
     File::ALT_SEPARATOR ? path.gsub(File::SEPARATOR, File::ALT_SEPARATOR) : path
   end
+
+  def method_missing(name, *args)
+    @browser.respond_to?(name) ? @browser.send(name, *args) : super
+  end
+
+  def p(*args)
+    @browser.p *args
+  end
 end
 
 Spec::Runner.configure do |config|
